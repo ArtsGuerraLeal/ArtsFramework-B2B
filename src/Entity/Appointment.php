@@ -102,6 +102,18 @@ class Appointment
      */
     private $status;
 
+    /**
+     * @ORM\OneToOne(targetEntity="App\Entity\Appointment", inversedBy="appointment", cascade={"persist", "remove"})
+     */
+    private $followup;
+
+    /**
+     * @ORM\OneToOne(targetEntity="App\Entity\Appointment", mappedBy="followup", cascade={"persist", "remove"})
+     */
+    private $appointment;
+
+    
+
     public function __construct()
     {
         $this->treatments = new ArrayCollection();
@@ -321,6 +333,38 @@ class Appointment
 
         return $this;
     }
+
+    public function getFollowup(): ?self
+    {
+        return $this->followup;
+    }
+
+    public function setFollowup(?self $followup): self
+    {
+        $this->followup = $followup;
+
+        return $this;
+    }
+
+    public function getAppointment(): ?self
+    {
+        return $this->appointment;
+    }
+
+    public function setAppointment(?self $appointment): self
+    {
+        $this->appointment = $appointment;
+
+        // set (or unset) the owning side of the relation if necessary
+        $newFollowup = null === $appointment ? null : $this;
+        if ($appointment->getFollowup() !== $newFollowup) {
+            $appointment->setFollowup($newFollowup);
+        }
+
+        return $this;
+    }
+
+   
 
 
 }

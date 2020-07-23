@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Appointment;
 use App\Entity\Patient;
 use App\Form\AppointmentType;
+use App\Form\FollowupType;
 use App\Form\PatientAppointmentType;
 use App\Repository\AppointmentRepository;
 use App\Repository\CompanyRepository;
@@ -25,6 +26,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Symfony\Component\Security\Core\Security;
+use Twilio\Exceptions\ConfigurationException;
+use Twilio\Exceptions\TwilioException;
 
 /**
  * @Route("/appointment")
@@ -107,6 +110,142 @@ class AppointmentController extends AbstractFOSRestController
         ]);
     }
 
+
+    /**
+     * @Route("/{id}/followup", name="appointment_followup", methods={"GET","POST"})
+     * @param PatientRepository $patientRepository
+     * @param Request $request
+     * @param $id
+     * @param Client $googleClient
+     * @param CompanyRepository $companyRepository
+     * @return Response
+     * @throws NonUniqueResultException
+     * @throws ConfigurationException
+     * @throws TwilioException
+     */
+    public function followup(AppointmentRepository $appointmentRepository, PatientRepository $patientRepository,Request $request,$id, Client $googleClient,CompanyRepository $companyRepository): Response
+    {
+        $user = $this->security->getUser();
+        $entityManager = $this->getDoctrine()->getManager();
+
+        $prevAppointment = $appointmentRepository->findOneByCompanyID($user->getCompany(),$id);
+
+        $patient = $patientRepository->findOneByCompanyID($user->getCompany(), $prevAppointment->getPatient());
+
+        $appointment = new Appointment();
+        $appointment->setPatient($patient);
+        $appointment->setCompany($user->getCompany());
+        $appointment->setAppointment($prevAppointment);
+        $appointment->setTreatment($prevAppointment->getTreatment());
+
+        $company = $companyRepository->findOneBy(['id'=>$user->getCompany()->getId()]);
+
+        $patient->getAppointment()->add($appointment);
+
+        $form = $this->createForm(FollowupType::class,$appointment);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+
+            $appointment->setTitle($patient->getFirstName()." ". $patient->getLastName(). " " ."#".$patient->getId(). " ". $appointment->getTreatment(). " " .$patient->getPhone());
+
+            $entityManager->persist($appointment);
+            $entityManager->flush();
+
+            $sid = 'AC650d86e24b4d0dcd5e9b4cad1c26a770';
+            $token = '97311b09fe3ea2b8c5acf028e99ca07a';
+
+            $twilio = new \Twilio\Rest\Client($sid, $token);
+
+            $patientPhone = $patient->getPhone();
+            $areaCode = substr($patientPhone, 0, 3);
+
+            if($areaCode == "+52"){
+                $message = $twilio->messages
+                    ->create($patient->getPhone(), // to
+                        array(
+                            "from" => "+12512548903",
+                            "body" => "Hola ".$patient->getFirstName() . ". Tu cita esta agendada para la fecha: ".$appointment->getBeginAt()->format("d-M H:i")
+                        )
+                    );
+
+            }else{
+                $message = $twilio->messages
+                    ->create("+52".$patient->getPhone(), // to
+                        array(
+                            "from" => "+12512548903",
+                            "body" => "Hola ".$patient->getFirstName() . ". Tu cita esta agendada para la fecha: ".$appointment->getBeginAt()->format("d-M H:i")
+                        )
+                    );
+
+            }
+
+            date_default_timezone_set('America/Monterrey');
+
+            if($company->getGoogleJson() != null) {
+                $client = $googleClient->getClient($company->getGoogleJson()[0]);
+
+                $service = new Google_Service_Calendar($client);
+
+                $event = new Google_Service_Calendar_Event(array(
+                    'summary' => $appointment->getTitle(),
+                    'description' => $appointment->getNotes(),
+
+                    'start' => array(
+                        'dateTime' => $appointment->getBeginAt()->format(DateTime::RFC3339),
+                        'timeZone' => 'America/Monterrey',
+
+
+                    ),
+                    'end' => array(
+                        'dateTime' => $appointment->getEndAt()->format(DateTime::RFC3339),
+                        'timeZone' => 'America/Monterrey',
+
+                    )
+                ));
+
+                $calendarId = $appointment->getCalendar();
+
+                switch ($appointment->getColor()) {
+                    case 'red':
+                        $event->setColorId('11');
+                        break;
+                    case 'orange':
+                        $event->setColorId('6');
+                        break;
+                    case 'yellow':
+                        $event->setColorId('5');
+                        break;
+                    case 'green':
+                        $event->setColorId('10');
+                        break;
+                    case 'blue':
+                        $event->setColorId('1');
+                        break;
+                    case 'purple':
+                        $event->setColorId('3');
+                        break;
+                    case 'grey':
+                        $event->setColorId('8');
+                        break;
+                }
+
+                $event = $service->events->insert($calendarId, $event);
+                $appointment->setEventId($event->getId());
+
+                $entityManager->persist($appointment);
+                $entityManager->flush();
+            }
+
+            return $this->redirectToRoute('patient_index');
+        }
+
+        return $this->render('appointment/followup.html.twig', [
+            'appointment' => $appointment,
+            'form' => $form->createView(),
+        ]);
+    }
+
     /**
      * @Route("/{id}", name="appointment_show", methods={"GET"})
      * @param AppointmentRepository $appointmentRepository
@@ -129,8 +268,11 @@ class AppointmentController extends AbstractFOSRestController
      * @param AppointmentRepository $appointmentRepository
      * @param $id
      * @param Client $googleClient
+     * @param CompanyRepository $companyRepository
      * @return Response
      * @throws NonUniqueResultException
+     * @throws ConfigurationException
+     * @throws TwilioException
      */
     public function edit(Request $request, AppointmentRepository $appointmentRepository, $id, Client $googleClient, CompanyRepository $companyRepository): Response
     {

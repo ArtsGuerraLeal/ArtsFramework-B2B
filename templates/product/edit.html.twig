@@ -1,11 +1,8 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}User Settings{% endblock %}
+{% block title %}Edit Product{% endblock %}
 
 {% block body %}
-
-
-    {{ form_start(form) }}
     <div class="app-page-title">
         <div class="page-title-wrapper">
             <div class="page-title-heading">
@@ -13,47 +10,24 @@
                     <i class="pe-7s-graph text-success">
                     </i>
                 </div>
-                <div>Company Settings
-                    <div class="page-title-subheading">Customize your companies options
+                <div>Producto
+                    <div class="page-title-subheading">Editar un producto
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="main-card mb-3 card">
-        <div class="card-body">
-            {%  if company.image != null %}
-                <img class="img-fluid img-thumbnail rounded " width="170px" height="170px" src="{{ '/uploads/' ~ company.image }}" />
+    {{ include('product/_form.html.twig', {'button_label': 'Actializar'}) }}
 
+    <a href="{{ path('product_index') }}">back to list</a>
 
-            {% else %}
-                <img class="img-fluid img-thumbnail rounded" width="170px" height="170px" src="{{ asset('assets/images/product_placeholder.jpg') }}" />
-
-
-            {% endif %}
-
-            {% for row in form %}
-
-                {{ form_row(row) }}
-
-            {% endfor %}
-            <div id="image-holder"></div>
-
-        </div>
-
-    </div>
-
-
-
-
-    {{ form_end(form) }}
-
+    {{ include('product/_delete_form.html.twig') }}
 
     <script src="{{ asset('js/jquery-3.3.1.js') }}"></script>
 
     <script type="text/javascript">
-        $("#form_attachment").on('change', function () {
+        $("#product_attachment").on('change', function () {
 
             if (typeof (FileReader) != "undefined") {
 
@@ -77,10 +51,5 @@
         });
 
     </script>
-
-
-
-
-
 
 {% endblock %}

@@ -32,7 +32,7 @@
 </head>
 
 <body>
-    <div class="app-container app-theme-white body-tabs-shadow fixed-sidebar fixed-header">
+    <div class="app-container app-theme-white body-tabs-shadow fixed-sidebar fixed-header closed-sidebar">
         <div class="app-header header-shadow bg-focus header-text-light">
             <div class="app-header__logo">
                 <div class="logo-src"></div>
@@ -447,8 +447,19 @@
                     <div class="scrollbar-sidebar">
                         <div class="app-sidebar__inner pt-1 pr-1 pb-1 pl-4.5">
                                 <p href="{{ path('home.index') }}" class="metismenu-icon my-2 font-weight-bold text-light" style="display: table;">
-                                    <img class="rounded-circle logo-pic bg-light " src={{ asset('img/clinimed.png') }} alt="">
+
+                                    {%  if app.user.company.image != null %}
+                                        <img class="rounded-circle logo-pic bg-light " src="{{ '/uploads/' ~ app.user.company.image }}" />
+
+                                    {% else %}
+                                        <img class="img-fluid img-thumbnail rounded" src="{{ asset('assets/images/avatar1.png') }}" />
+
+                                    {% endif %}
+
                                     {{app.user.company.name}}
+
+
+
                                 </p>
                             </div>
                         <div class="app-sidebar__inner">
@@ -460,6 +471,26 @@
                                         <i class="metismenu-icon pe-7s-rocket"></i>
                                         Dashboard
                                     </a>
+                                </li>
+
+                                <li>
+                                    <a href="">
+                                        <i class="metismenu-icon far pe-7s-cash"></i>
+                                        POS
+                                        <i class="metismenu-state-icon pe-7s-angle-down caret-left"></i>
+                                    </a>
+                                    <ul>
+                                        <li>
+                                            <a class="dropdown-item" href="{{ path('sale') }}">Hacer Venta</a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" href="{{ path('product_index') }}">Catalogo</a>
+                                        </li>
+                                        <div class="dropdown-divider"></div>
+                                        <li>
+                                            <a class="dropdown-item" href="">Historial de Ventas</a>
+                                        </li>
+                                    </ul>
                                 </li>
 
                                 <li>

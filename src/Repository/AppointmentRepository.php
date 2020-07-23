@@ -70,6 +70,20 @@ class AppointmentRepository extends ServiceEntityRepository
     }
 
 
+    public function findOneByCompanyAndPatient($companyId,$id)
+    {
+        return $this->createQueryBuilder('appointment')
+            ->andWhere('appointment.company = :company')
+            ->andWhere('appointment.patient = :id')
+            ->setParameter('company', $companyId)
+            ->setParameter('id', $id)
+            ->orderBy('appointment.id', 'ASC')
+            ->getQuery()
+            ->getResult()
+            ;
+    }
+
+
     public function findBetweenDates($companyId,$startDate,$endDate)
     {
         return $this->createQueryBuilder('appointment')

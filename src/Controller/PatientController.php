@@ -168,7 +168,7 @@ class PatientController extends AbstractFOSRestController
      * @throws \Twilio\Exceptions\ConfigurationException
      * @throws \Twilio\Exceptions\TwilioException
      */
-    public function appointment(PatientRepository $patientRepository ,$id,Request $request, Client $googleClient, CompanyRepository $companyRepository): Response
+    public function appointment(PatientRepository $patientRepository,$id,Request $request, Client $googleClient, CompanyRepository $companyRepository): Response
     {
         $user = $this->security->getUser();
         $entityManager = $this->getDoctrine()->getManager();
@@ -524,13 +524,15 @@ class PatientController extends AbstractFOSRestController
      * @return Response
      * @throws NonUniqueResultException
      */
-    public function show(PatientRepository $patientRepository,CustomFormRepository $customFormRepository, $id): Response
+    public function show(PatientRepository $patientRepository,CustomFormRepository $customFormRepository,AppointmentRepository $appointmentRepository, $id): Response
     {
         $user = $this->security->getUser();
         $patient = $patientRepository->findOneByCompanyID($user->getCompany(), $id);
         $customForms = $customFormRepository->findByCompany($user->getCompany());
+        $appointments = $appointmentRepository->findOneByCompanyAndPatient($user->getCompany(),$id);
         return $this->render('patient/show.html.twig', [
             'patient' => $patient,
+            'appointments'=> $appointments,
             'customForms'=>$customForms
         ]);
     }
