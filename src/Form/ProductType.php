@@ -47,6 +47,11 @@ class ProductType extends AbstractType
                 'required' => false,
                 'label'=>'Incluye IVA?'
             ])
+            ->add('cost',NumberType::class,[
+                'required' => false,
+                'label'=>'Costo'
+
+            ])
             ->add('category',EntityType::class, [
                 'class' => Category::class,
                 'choice_label' => function(Category $category) {

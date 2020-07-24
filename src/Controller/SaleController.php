@@ -11,6 +11,7 @@ use App\Repository\CategoryRepository;
 use App\Repository\PatientRepository;
 use App\Repository\PaymentMethodRepository;
 use App\Repository\ProductRepository;
+use App\Repository\ProductSoldRepository;
 use App\Repository\SaleRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -51,18 +52,20 @@ class SaleController extends AbstractController
     private $categoryRepository;
 
     private $security;
+    /**
+     * @var ProductSoldRepository
+     */
+    private $productSoldRepository;
 
 
-
-
-
-    public function __construct(CategoryRepository $categoryRepository, SaleRepository $saleRepository, ProductRepository $productRepository, EntityManagerInterface $entityManager,PaymentMethodRepository $paymentMethodRepository, Security $security){
+    public function __construct(ProductSoldRepository $productSoldRepository, CategoryRepository $categoryRepository, SaleRepository $saleRepository, ProductRepository $productRepository, EntityManagerInterface $entityManager,PaymentMethodRepository $paymentMethodRepository, Security $security){
         $this->entityManager = $entityManager;
         $this->productRepository = $productRepository;
         $this->security = $security;
         $this->paymentMethodRepository = $paymentMethodRepository;
         $this->saleRepository = $saleRepository;
         $this->categoryRepository = $categoryRepository;
+        $this->productSoldRepository = $productSoldRepository;
     }
 
     /**
@@ -122,6 +125,44 @@ class SaleController extends AbstractController
         return $this->render('sale/payment.html.twig', [
             'paymentMethods' => $this->paymentMethodRepository->findAll(),
             'sale' => $sale
+        ]);
+
+    }
+
+    /**
+     * @Route("/{id}/order", name="order", methods={"GET","POST"})
+     * @param $id
+     * @param Request $request
+     * @return Response
+     */
+    public function order($id,Request $request): Response
+    {
+
+        $user = $this->security->getUser();
+        $sale = $this->saleRepository->findOneBy(['id'=>$id]);
+        $products = $this->productSoldRepository->findBy(['sale'=>$id]);
+
+        return $this->render('sale/order.html.twig', [
+            'sale' => $sale,
+            'products'=>$products
+        ]);
+
+    }
+
+    /**
+     * @Route("/history", name="history", methods={"GET","POST"})
+     * @param Request $request
+     * @return Response
+     */
+    public function history(Request $request): Response
+    {
+
+        $user = $this->security->getUser();
+        $sales = $this->saleRepository->findAll();
+
+        return $this->render('sale/history.html.twig', [
+            'sales' => $sales
+
         ]);
 
     }

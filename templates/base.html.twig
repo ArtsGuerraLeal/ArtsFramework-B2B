@@ -33,7 +33,7 @@
 
 <body>
     <div class="app-container app-theme-white body-tabs-shadow fixed-sidebar fixed-header closed-sidebar">
-        <div class="app-header header-shadow bg-focus header-text-light">
+        <div class="app-header header-shadow bg-primary header-text-light">
             <div class="app-header__logo">
                 <div class="logo-src"></div>
                 <div class="header__pane ml-auto">
@@ -413,7 +413,7 @@
                 </div>
             </div>
         </div>        <div class="app-main">
-                <div class="app-sidebar sidebar-shadow bg-focus sidebar-text-light">
+                <div class="app-sidebar sidebar-shadow bg-primary sidebar-text-light">
                     <div class="app-header__logo">
                         <div class="logo-src"></div>
                         <div class="header__pane ml-auto">
@@ -488,126 +488,12 @@
                                         </li>
                                         <div class="dropdown-divider"></div>
                                         <li>
-                                            <a class="dropdown-item" href="">Historial de Ventas</a>
+                                            <a class="dropdown-item" href="{{ path('history') }}">Historial de Ventas</a>
                                         </li>
                                     </ul>
                                 </li>
 
-                                <li>
-                                    <a href="">
-                                        <i class="metismenu-icon far fa-user"></i>
-                                        Pacientes
-                                        <i class="metismenu-state-icon pe-7s-angle-down caret-left"></i>
-                                    </a>
-                                    <ul>
-                                        <li>
-                                            <a class="dropdown-item" href="{{ path('patient_index') }}">Lista de Pacientes</a>
-                                        </li>
-                                        <li>
-                                            <a class="dropdown-item" href="{{ path('patient_new') }}">Nuevo Paciente</a>
-                                        </li>
-                                        <div class="dropdown-divider"></div>
-                                        <li>
-                                            <a class="dropdown-item" href="{{ path('appointment_index') }}">Lista de Citas</a>
-                                        </li>
-                                    </ul>
-                                </li>
-                                <li>
-                                    <a href="">
-                                        <i class="metismenu-icon fas fa-fw fa-hammer"></i>
-                                        Equipo
-                                        <i class="metismenu-state-icon pe-7s-angle-down caret-left"></i>
-                                    </a>
-                                    <ul>
-                                        <li>
-                                            <a class="dropdown-item" href="{{ path('equipment_index') }}">Lista de Equipo</a>
 
-                                        </li>
-                                        <li>
-                                            <a class="dropdown-item" href="{{ path('equipment_new') }}">Nuevo Equipo</a>
-
-                                        </li>
-
-                                    </ul>
-                                </li>
-                                <li>
-                                    <a href="">
-                                        <i class="metismenu-icon pe-7s-display2"></i>
-                                        Tratamientos
-                                        <i class="metismenu-state-icon pe-7s-angle-down caret-left"></i>
-                                    </a>
-                                    <ul>
-                                        <li>
-                                            <a class="dropdown-item" href="{{ path('treatment_index') }}">Lista de Tratamientos</a>
-
-                                        </li>
-                                        <li>
-                                            <a class="dropdown-item" href="{{ path('treatment_new') }}">Nuevo Tratamiento</a>
-                                        </li>
-
-                                    </ul>
-                                </li>
-
-
-
-                                <li>
-                                    <a href="">
-                                        <i class="metismenu-icon pe-7s-users"></i>
-                                        Empleados
-                                        <i class="metismenu-state-icon pe-7s-angle-down caret-left"></i>
-                                    </a>
-                                    <ul>
-                                        <li>
-                                            <a class="dropdown-item" href="{{ path('staff_index') }}">Lista de Empleados</a>
-                                        </li>
-                                        <li>
-                                            <a class="dropdown-item" href="{{ path('staff_new') }}">Nuevo Empleado</a>
-                                        </li>
-                                        <div class="dropdown-divider"></div>
-                                        <li>
-                                            <a class="dropdown-item" href="{{ path('staff_positions_index') }}">Posiciones de Empleados</a>
-                                        </li>
-                                        <li>
-                                            <a class="dropdown-item" href="{{ path('staff_positions_new') }}">Nueva Posicione de Empleado</a>
-                                        </li>
-                                    </ul>
-                                </li>
-                                <li>
-                                    <a href="">
-                                        <i class="metismenu-icon pe-7s-graph2"></i>
-                                        Reportes
-                                        <i class="metismenu-state-icon pe-7s-angle-down caret-left"></i>
-                                    </a>
-                                    <ul>
-                                        <li>
-                                            <a class="dropdown-item" href="{{ path('staff_index') }}">Report 1</a>
-                                        </li>
-                                        <li>
-                                            <a class="dropdown-item" href="{{ path('staff_new') }}">Report 2</a>
-                                        </li>
-                                        <li>
-                                            <a class="dropdown-item" href="{{ path('staff_positions_index') }}">Report 3</a>
-                                        </li>
-                                        <li>
-                                            <a class="dropdown-item" href="{{ path('staff_positions_new') }}">Report 4</a>
-                                        </li>
-                                    </ul>
-                                </li>
-                                <li>
-                                    <a href="">
-                                        <i class="metismenu-icon pe-7s-pen"></i>
-                                        Formas Customizables
-                                        <i class="metismenu-state-icon pe-7s-angle-down caret-left"></i>
-                                    </a>
-                                    <ul>
-                                        <li>
-                                            <a class="dropdown-item" href="{{ path('custom_form_index') }}">Custom Form List</a>
-                                        </li>
-                                        <li>
-                                            <a class="dropdown-item" href="{{ path('custom_form_new') }}">New Form</a>
-                                        </li>
-                                    </ul>
-                                </li>
 
                                 <li>
                                     <a href="{{ path('appointment_calendar') }}">

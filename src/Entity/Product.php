@@ -63,6 +63,21 @@ class Product
      */
     private $isMultiple;
 
+    /**
+     * @ORM\Column(type="integer", nullable=true)
+     */
+    private $minPurchase;
+
+    /**
+     * @ORM\Column(type="integer", nullable=true)
+     */
+    private $purchaseStep;
+
+    /**
+     * @ORM\Column(type="float", nullable=true)
+     */
+    private $cost;
+
     public function __construct()
     {
         $this->productSolds = new ArrayCollection();
@@ -196,6 +211,42 @@ class Product
     public function setIsMultiple(?bool $isMultiple): self
     {
         $this->isMultiple = $isMultiple;
+
+        return $this;
+    }
+
+    public function getMinPurchase(): ?int
+    {
+        return $this->minPurchase;
+    }
+
+    public function setMinPurchase(?int $minPurchase): self
+    {
+        $this->minPurchase = $minPurchase;
+
+        return $this;
+    }
+
+    public function getPurchaseStep(): ?int
+    {
+        return $this->purchaseStep;
+    }
+
+    public function setPurchaseStep(?int $purchaseStep): self
+    {
+        $this->purchaseStep = $purchaseStep;
+
+        return $this;
+    }
+
+    public function getCost(): ?float
+    {
+        return $this->cost;
+    }
+
+    public function setCost(?float $cost): self
+    {
+        $this->cost = $cost;
 
         return $this;
     }

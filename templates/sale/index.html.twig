@@ -38,9 +38,9 @@
                             {% endif %}
                             <div style="border:1px solid #333; background-color:#f1f1f1; border-radius:5px; padding:16px; cursor:move" align="center">
                                 {%  if product.image != null %}
-                                    <img class="img-fluid img-thumbnail rounded img-responsive product_drag" style="height:150px;  width:100%;" src="{{ '/uploads/' ~ product.image }}" data-id="{{ product.id }}" data-name="{{ product.name }}" data-price="{{ product.price }}" data-taxable="{{ product.isTaxable }}"  />
+                                    <img class="img-fluid img-thumbnail rounded img-responsive product_drag" style="height:150px;  width:100%;" src="{{ '/uploads/' ~ product.image }}" data-id="{{ product.id }}" data-name="{{ product.name }}" data-price="{{ product.price }}" data-taxable="{{ product.isTaxable }}"  data-min="{{ product.minPurchase }}" data-step="{{ product.purchaseStep }}"/>
                                 {% else %}
-                                    <img class="img-fluid img-thumbnail rounded img-responsive product_drag" style="    height:150px;  width:100%;" src="{{ asset('assets/images/product_placeholder.jpg') }}" data-id="{{ product.id }}" data-name="{{ product.name }}" data-price="{{ product.price }}" data-taxable="{{ product.isTaxable }}" />
+                                    <img class="img-fluid img-thumbnail rounded img-responsive product_drag" style="    height:150px;  width:100%;" src="{{ asset('assets/images/product_placeholder.jpg') }}" data-id="{{ product.id }}" data-name="{{ product.name }}" data-price="{{ product.price }}" data-taxable="{{ product.isTaxable }}"  data-min="{{ product.minPurchase }}" data-step="{{ product.purchaseStep }}"/>
                                 {% endif %}
 
                                 <h5 class="text-info" style="width: auto; white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">{{ product.name }}</h5>
@@ -50,6 +50,15 @@
 
 
 
+                                {% endif %}
+
+                                {%  if product.minPurchase != 1 %}
+                                    <p class="my-0"id="">Compra Minima: {{ product.minPurchase }}</p>
+
+                                {% endif %}
+
+                                {%  if product.purchaseStep != 1 %}
+                                    <p class="my-0"id="">Incrementos: {{ product.purchaseStep }}</p>
 
                                 {% endif %}
 
@@ -102,7 +111,7 @@
                 <div id="dragable_product_order">
                 </div>
                     <table id="cart" class="cart-table table table-bordered"  >
-                        <h5>Cliente</h5><input id="client_name" type="text" class="rounded my-1">
+                        <h5></h5><input id="client_name" type="hidden" class="rounded my-1">
                         <thead>
                         <tr>
                             <th>Nombre</th>
@@ -302,6 +311,7 @@
                 var prodID = $(this).parent().parent().attr('id');
                 var productCard = $("img[data-id='" + prodID +"']").parent().children('h6').children('p');
                 var prodTaxable = $("img[data-id='" + prodID +"']").attr('data-taxable');
+                var prodMin = parseFloat($("img[data-id='" + prodID +"']").attr('data-min'));
 
                 var total = document.querySelector('#total');
                 var subtotal = document.querySelector('#subtotal');
@@ -309,7 +319,7 @@
 
                 var i = $(this).parent().parent().index();
                 var table = $(this).parent().parent().parent();
-
+                var clear = false;
                 if(quantity === "1"){
                     $(this).parent().parent().remove();
 
@@ -317,7 +327,26 @@
                         productCard[0].innerText = parseFloat(productCard[0].innerText) + 1;
                     }
 
-                }else{
+                }else if(parseFloat(quantity) === prodMin){
+                    $(this).parent().parent().remove();
+
+                    if(productCard[0] !== undefined){
+                        productCard[0].innerText = parseFloat(productCard[0].innerText) + prodMin;
+                    }
+                    if(prodTaxable ==="1"){
+                        tax.innerText = (parseFloat(tax.innerText) - ( (prodPrice * prodMin) *.16)).toFixed(2);
+                        total.innerText = (parseFloat(total.innerText) - (prodPrice * prodMin)).toFixed(2);
+                        subtotal.innerText = (parseFloat(subtotal.innerText) - ((prodPrice * prodMin) - ((prodPrice * prodMin)*.16)) ).toFixed(2);
+
+                    }else{
+                        total.innerText = (parseFloat(total.innerText) - (prodPrice * prodMin)).toFixed(2);
+                        subtotal.innerText = (parseFloat(subtotal.innerText) - (prodPrice * prodMin)).toFixed(2);
+
+                    }
+                    clear = true;
+
+                }
+                else{
                     $(this).parent().parent().children()[1].innerText = quantity - 1;
 
                     if(productCard[0] !== undefined){
@@ -329,7 +358,7 @@
                 }
 
 
-
+            if(!clear){
                 if(prodTaxable ==="1"){
                     tax.innerText = (parseFloat(tax.innerText) - (prodPrice*.16)).toFixed(2);
                     total.innerText = (parseFloat(total.innerText) - prodPrice).toFixed(2);
@@ -339,6 +368,7 @@
                     subtotal.innerText = (parseFloat(subtotal.innerText) - prodPrice).toFixed(2);
 
                 }
+            }
 
 
             });
@@ -381,10 +411,13 @@
                 var prodPrice = parseFloat($(this).parent().parent().children('img').attr('data-price'));
                 var prodID = $(this).parent().parent().children('img').attr('data-id');
                 var prodTaxable = $(this).parent().parent().children('img').attr('data-taxable');
-
+                var prodMin = parseFloat($(this).parent().parent().children('img').attr('data-min'));
+                var prodStep = parseFloat($(this).parent().parent().children('img').attr('data-step'));
+                var firstAdd = true;
                 var prod_quantity = $(this).parent().parent().find("#product-quantity");
+
                 if(prod_quantity[0] !== undefined){
-                    prod_quantity[0].innerText = parseInt(prod_quantity[0].innerText)-1;
+                    prod_quantity[0].innerText = parseInt(prod_quantity[0].innerText)-prodStep;
                 }
 
                 var total = document.querySelector('#total');
@@ -397,25 +430,47 @@
                 });
 
                 if(cellVal.text() === ""){
-                    $(".cart-table").prepend('<tr id="'+prodID+'"><td >'+prodName+'</td><td id="quantity">1</td><td id="price">'+prodPrice+'</td><td><div class="remove_product btn btn-danger btn-sm my-1">Borrar</div><div class="remove_all btn btn-warning my-1 btn-sm">Borrar Todo</div>    <div class="discount_product btn btn-success my-1 btn-sm">Descuento</div></td></tr>');
+                    if(prodMin === ""){
+                        $(".cart-table").prepend('<tr id="'+prodID+'"><td >'+prodName+'</td><td id="quantity">1</td><td id="price">'+prodPrice+'</td><td><div class="remove_product btn btn-danger btn-sm my-1">Borrar</div><div class="remove_all btn btn-warning my-1 btn-sm">Borrar Todo</div>    <div class="discount_product btn btn-success my-1 btn-sm">Descuento</div></td></tr>');
+                    }else{
+                        $(".cart-table").prepend('<tr id="'+prodID+'"><td >'+prodName+'</td><td id="quantity">'+ prodMin+'</td><td id="price">'+prodPrice * prodMin+'</td><td><div class="remove_product btn btn-danger btn-sm my-1">Borrar</div><div class="remove_all btn btn-warning my-1 btn-sm">Borrar Todo</div>    <div class="discount_product btn btn-success my-1 btn-sm">Descuento</div></td></tr>');
+
+                        if(prod_quantity[0] !== undefined){
+                            prod_quantity[0].innerText = parseInt(prod_quantity[0].innerText)-prodMin + prodStep;
+                        }
+
+                        if(prodTaxable ==="1"){
+                            tax.innerText = (parseFloat(tax.innerText) + ( (prodPrice * prodMin) *.16)).toFixed(2);
+                            total.innerText = (parseFloat(total.innerText) + (prodPrice * prodMin)).toFixed(2);
+                            subtotal.innerText = (parseFloat(subtotal.innerText) + ((prodPrice * prodMin) - ((prodPrice * prodMin)*.16)) ).toFixed(2);
+
+                        }else{
+                            total.innerText = (parseFloat(total.innerText) + (prodPrice * prodMin)).toFixed(2);
+                            subtotal.innerText = (parseFloat(subtotal.innerText) + (prodPrice * prodMin)).toFixed(2);
+
+                        }
+                        firstAdd = false;
+                    }
+
                 }else{
                     var quantity = parseInt(cellVal.parent().children()[1].innerText);
-                    cellVal.parent().children()[1].innerText = quantity +1;
+                    cellVal.parent().children()[1].innerText = quantity + prodStep;
 
                     var price = parseInt(cellVal.parent().children()[2].innerText);
-                    cellVal.parent().children()[2].innerText = price + prodPrice;
+                    cellVal.parent().children()[2].innerText = price + (prodPrice * prodStep);
                 }
-
+            if(firstAdd){
                 if(prodTaxable ==="1"){
-                    tax.innerText = (parseFloat(tax.innerText) + (prodPrice*.16)).toFixed(2);
-                    total.innerText = (parseFloat(total.innerText) + prodPrice).toFixed(2);
-                    subtotal.innerText = (parseFloat(subtotal.innerText) + (prodPrice - (prodPrice*.16)) ).toFixed(2);
+                    tax.innerText = (parseFloat(tax.innerText) + ((prodPrice * prodStep)*.16)).toFixed(2);
+                    total.innerText = (parseFloat(total.innerText) + (prodPrice * prodStep)).toFixed(2);
+                    subtotal.innerText = (parseFloat(subtotal.innerText) + ((prodPrice * prodStep) - ((prodPrice * prodStep)*.16)) ).toFixed(2);
 
                 }else{
-                    total.innerText = (parseFloat(total.innerText) + prodPrice).toFixed(2);
-                    subtotal.innerText = (parseFloat(subtotal.innerText) + prodPrice).toFixed(2);
+                    total.innerText = (parseFloat(total.innerText) + (prodPrice * prodStep)).toFixed(2);
+                    subtotal.innerText = (parseFloat(subtotal.innerText) + (prodPrice * prodStep)).toFixed(2);
 
                 }
+            }
 
             });
 
@@ -476,13 +531,10 @@
                     return $(this).text() === prodName;
                 });
                 if(cellVal.text() === ""){
-                    if(prodAmount ===1){
+                    if(prodAmount === 1){
                         $(".cart-table").prepend('<tr id="'+prodID+'"><td >'+prodName+'</td><td id="quantity">1</td><td id="price">'+prodPrice+'</td><td><div class="remove_product btn btn-danger btn-sm my-1">Borrar</div><div class="remove_all btn btn-warning my-1 btn-sm">Borrar Todo</div><div class="discount_product btn btn-success my-1 btn-sm">Descuento</div></td></tr>');
-
                     }else{
-
                         $(".cart-table").prepend('<tr id="'+prodID+'"><td >'+prodName+'</td><td id="quantity">'+ prodAmount +'</td><td id="price">'+(prodPrice * prodAmount)+'</td><td><div class="remove_product btn btn-danger btn-sm my-1">Borrar</div><div class="remove_all btn btn-warning my-1 btn-sm">Borrar Todo</div><div class="discount_product btn btn-success my-1 btn-sm">Descuento</div></td></tr>');
-
                     }
 
                 }else{
@@ -653,7 +705,7 @@
                     success:function (php_result) {
                         console.log(php_result);
                         saleID = php_result.toString();
-                        window.location.replace(saleID+"/payment");
+                        window.location.replace(saleID+"/order");
 
                     }
 
